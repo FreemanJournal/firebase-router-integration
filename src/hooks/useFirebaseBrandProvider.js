@@ -1,16 +1,27 @@
-import { FacebookAuthProvider, getAuth, getRedirectResult, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import React, { useContext } from 'react'
+import { FacebookAuthProvider, getAuth, getRedirectResult, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import React, { useContext, useEffect, useState } from 'react'
 import { GlobalContext } from '../context/GlobalContext'
 import app from '../utilitis/firebase.init';
 
 export default function useFirebaseBrandProvider() {
-  const { user, setUser, message, setMessage } = useContext(GlobalContext)
-
+  const { user, message, setMessage } = useContext(GlobalContext)
+  const [userData, setUserData] = useState();
   const auth = getAuth(app);
 
   const googleProvider = new GoogleAuthProvider();
   const gitProvider = new GithubAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserData(user)
+      } else {
+        setUserData({})
+      }
+    });
+
+  }, [])
 
   const authorizationHandler = (provider, authProvider) => {
     signInWithPopup(auth, provider)
@@ -20,8 +31,8 @@ export default function useFirebaseBrandProvider() {
         const token = credential.accessToken;
         // The signed-in user info.
         const user = result.user;
-      
-        setUser(user)
+
+        setUserData(user)
       }).catch((error) => {
         // Handle Errors here.
         const errorCode = error.code;
@@ -44,7 +55,7 @@ export default function useFirebaseBrandProvider() {
 
         // The signed-in user info.
         const user = result.user;
-        setUser(user)
+        setUserData(user)
 
       }).catch((error) => {
         // Handle Errors here.
@@ -62,9 +73,9 @@ export default function useFirebaseBrandProvider() {
   const handleSignOut = () => {
 
     signOut(auth).then(() => {
-      setUser({})
+      setUserData({})
     }).catch((error) => {
-      setUser({})
+      setUserData({})
     });
   }
 
@@ -73,5 +84,5 @@ export default function useFirebaseBrandProvider() {
   const facebookAuthorizationHandler = () => authorizationHandler(facebookProvider, FacebookAuthProvider)
 
   const googleRedirectAuthorization = () => signInWithRedirect(googleProvider, GoogleAuthProvider)
-  return { googleAuthorizationHandler, githubAuthorizationHandler, facebookAuthorizationHandler,googleRedirectAuthorization, handleSignOut }
+  return { googleAuthorizationHandler, githubAuthorizationHandler, facebookAuthorizationHandler, googleRedirectAuthorization, handleSignOut }
 }

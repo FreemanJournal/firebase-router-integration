@@ -1,12 +1,27 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { LockClosedIcon } from '@heroicons/react/solid'
 import useFirebaseBrandProvider from '../../hooks/useFirebaseBrandProvider';
 import { GlobalContext } from '../../context/GlobalContext';
 import { FaFacebook, FaGithub, FaGoogle } from 'react-icons/fa';
-
+import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
+import { useLocation, useNavigate } from 'react-router-dom';
 export default function LogIn() {
-  const { user, setUser, message, setMessage } = useContext(GlobalContext)
-  const { googleAuthorizationHandler, githubAuthorizationHandler, facebookAuthorizationHandler,googleRedirectAuthorization } = useFirebaseBrandProvider();
+  const { message, setMessage, auth } = useContext(GlobalContext)
+  const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
+  let navigate = useNavigate();
+  let location = useLocation();
+ 
+
+  useEffect(()=>{
+    let from = location.state?.from?.pathname || "/";
+    user && navigate(from, { replace: true });
+  },[user])
+
+ 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <>
       <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -21,7 +36,7 @@ export default function LogIn() {
             <div className='my-4'>
               <button
                 type="button"
-                onClick={googleAuthorizationHandler}
+                onClick={() => signInWithGoogle()}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -30,7 +45,7 @@ export default function LogIn() {
                 Google
               </button>
             </div>
-            <div className='my-4'>
+            {/* <div className='my-4'>
               <button
                 type="button"
                 onClick={facebookAuthorizationHandler}
@@ -53,7 +68,7 @@ export default function LogIn() {
                 </span>
                 Github
               </button>
-            </div>
+            </div> */}
             {<p className="font-medium text-indigo-600 hover:text-indigo-500 text-center my-5">
               {
                 message?.includes('(auth/weak-password)') ? "Password should be at least 6 characters." :

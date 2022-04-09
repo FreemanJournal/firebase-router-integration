@@ -6,6 +6,7 @@ import { Link, NavLink } from 'react-router-dom'
 import useFirebaseNativeProvider from '../../hooks/useFirebaseNativeProvider'
 import { GlobalContext } from '../../context/GlobalContext'
 import useFirebaseBrandProvider from '../../hooks/useFirebaseBrandProvider'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 
 
@@ -14,12 +15,19 @@ function classNames(...classes) {
 }
 
 export default function Header() {
-    const { user } = useContext(GlobalContext)
+    const { userData, auth } = useContext(GlobalContext)
+    const [user, loading, error] = useAuthState(auth);
+
     const { handleSignOut } = useFirebaseBrandProvider()
     const [display, setDisplay] = useState(false);
 
-    useEffect(() => user.uid ? setDisplay(true) : setDisplay(false), [user])
+    useEffect(() => user ? setDisplay(true) : setDisplay(false), [user])
 
+    // if (loading) {
+    //     return <p>Loading...</p>;
+    // }
+
+    
     const navigation = [
         { name: 'Home', href: '/', current: false },
         { name: 'Blog', href: '/blogs', current: false },
@@ -74,22 +82,22 @@ export default function Header() {
                                                 {item.name}
                                             </NavLink>
                                         ))}
-                                        {user.uid && <button className='text-gray-300 hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium' onClick={handleSignOut}>Log Out</button>}
+                                        {user && <button className='text-gray-300 hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium' onClick={handleSignOut}>Log Out</button>}
                                     </div>
                                 </div>
                             </div>
                             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                                <Link to="/" className='text-gray-300 hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium'>{user && user?.displayName}</Link>
+                                {user && <Link to="/dashboard" className='text-gray-300 hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium'>{user?.displayName}</Link>}
 
                                 {/* Profile dropdown */}
                                 <Menu as="div" className="ml-3 relative">
                                     <div>
                                         <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                                            <span className="sr-only">Open user menu</span>
+                                            <span className="sr-only">Open userData menu</span>
 
-                                            <img
+                                           <img
                                                 className="h-8 w-8 rounded-full"
-                                                src={user.photoURL || "/images/avatar.jpg"}
+                                                src={user?.photoURL || "/images/avatar.jpg"}
                                                 alt="Profile Pic"
                                             />
                                         </Menu.Button>
