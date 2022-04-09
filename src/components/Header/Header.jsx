@@ -1,12 +1,11 @@
 /* This example requires Tailwind CSS v2.0+ */
-import { Fragment, useContext, useEffect, useState } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
+import { MenuIcon, XIcon } from '@heroicons/react/outline'
+import { Fragment, useContext, useEffect, useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { Link, NavLink } from 'react-router-dom'
-import useFirebaseNativeProvider from '../../hooks/useFirebaseNativeProvider'
 import { GlobalContext } from '../../context/GlobalContext'
 import useFirebaseBrandProvider from '../../hooks/useFirebaseBrandProvider'
-import { useAuthState } from 'react-firebase-hooks/auth'
 
 
 
@@ -23,15 +22,13 @@ export default function Header() {
 
     useEffect(() => user ? setDisplay(true) : setDisplay(false), [user])
 
-    // if (loading) {
-    //     return <p>Loading...</p>;
-    // }
 
-    
+
+
     const navigation = [
         { name: 'Home', href: '/', current: false },
         { name: 'Blog', href: '/blogs', current: false },
-        { name: 'Dashboard', href: '/dashboard', current: false },
+        { name: 'Dashboard', href: '/dashboard', current: !display },
         { name: 'Log In', href: '/login', current: display },
         { name: 'Registration', href: '/registration', current: display },
     ]
@@ -95,11 +92,11 @@ export default function Header() {
                                         <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                                             <span className="sr-only">Open userData menu</span>
 
-                                           <img
+                                            {user && (<img
                                                 className="h-8 w-8 rounded-full"
                                                 src={user?.photoURL || "/images/avatar.jpg"}
                                                 alt="Profile Pic"
-                                            />
+                                            />)}
                                         </Menu.Button>
                                     </div>
                                     <Transition
@@ -114,32 +111,23 @@ export default function Header() {
                                         <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <a
-                                                        href="#"
-                                                        className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                                                    >
+                                                    <Link to='/' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                                         Your Profile
-                                                    </a>
+                                                    </Link>
                                                 )}
                                             </Menu.Item>
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <a
-                                                        href="#"
-                                                        className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                                                    >
+                                                    <Link to='/' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                                         Settings
-                                                    </a>
+                                                    </Link>
                                                 )}
                                             </Menu.Item>
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <a
-                                                        href="#"
-                                                        className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                                                    >
-                                                        Sign out
-                                                    </a>
+                                                     <Link to='/' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                                     Sign out
+                                                 </Link>
                                                 )}
                                             </Menu.Item>
                                         </Menu.Items>
@@ -152,10 +140,10 @@ export default function Header() {
                     <Disclosure.Panel className="sm:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             {navigation.map((item) => (
-                                <Disclosure.Button
+                                <NavLink
                                     key={item.name}
-                                    as="a"
-                                    href={item.href}
+                                   
+                                    to={item.href}
                                     className={classNames(
                                         item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                                         'block px-3 py-2 rounded-md text-base font-medium'
@@ -163,7 +151,7 @@ export default function Header() {
                                     aria-current={item.current ? 'page' : undefined}
                                 >
                                     {item.name}
-                                </Disclosure.Button>
+                                </NavLink>
                             ))}
                         </div>
                     </Disclosure.Panel>
